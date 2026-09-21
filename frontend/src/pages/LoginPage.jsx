@@ -2,30 +2,49 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, User, KeyRound, ArrowLeft } from 'lucide-react';
 import logoImg from '../assets/Logo.png';
+import { API_BASE_URL } from '../config/constants';
 
 /**
  * Tela de autenticação para controle de acesso ao painel de leads.
- * Armazena as credenciais codificadas em Base64 no localStorage para envio no header Authorization.
+ * As credenciais são validadas exclusivamente pelo backend (Basic Auth).
+ * Nenhuma senha fica exposta no código frontend.
  */
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   /**
-   * Valida as credenciais fornecidas contra o usuário padrão configurado no backend.
-   * Em caso de sucesso, gera o token HTTP Basic e redireciona para a rota /admin.
+   * Envia as credenciais ao backend via Basic Auth e aguarda a resposta.
+   * Credenciais corretas (200) → armazena token e redireciona.
+   * Credenciais erradas (401) → exibe mensagem de erro.
    */
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    if (username === 'Veras' && password === 'veras123') {
-      const basicToken = btoa(`${username}:${password}`);
-      localStorage.setItem('adminToken', basicToken);
-      navigate('/admin');
-    } else {
-      setError('Credenciais incorretas. Verifique usuário e senha.');
+    const basicToken = btoa(`${username}:${password}`);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/clients`, {
+        headers: { 'Authorization': `Basic ${basicToken}` }
+      });
+
+      if (response.ok || response.status === 200) {
+        localStorage.setItem('adminToken', basicToken);
+        navigate('/admin');
+      } else if (response.status === 401) {
+        setError('Credenciais incorretas. Verifique usuário e senha.');
+      } else {
+        setError('Erro ao conectar com o servidor. Tente novamente.');
+      }
+    } catch {
+      setError('Servidor offline ou inacessível no momento.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,9 +107,9 @@ const LoginPage = () => {
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
             <Lock size={18} />
-            <span>Entrar no Painel</span>
+            <span>{loading ? 'Verificando...' : 'Entrar no Painel'}</span>
           </button>
         </form>
 
