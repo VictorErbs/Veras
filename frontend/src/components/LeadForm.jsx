@@ -17,26 +17,36 @@ const LeadForm = () => {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Máscara brasileira para celular/WhatsApp: (XX) 9XXXX-XXXX
-  const handlePhoneChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-    let formatted = digits;
-
-    if (digits.length > 7) {
-      if (digits.length === 10 && digits[2] !== '9') {
-        // Fixo (10 dígitos sem 9 inicial)
-        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-      } else {
-        // Celular (9 dígitos): (XX) 9XXXX-XXXX
-        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-      }
-    } else if (digits.length > 2) {
-      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    } else if (digits.length > 0) {
-      formatted = `(${digits}`;
+  // Formata número de telefone/celular brasileiro
+  const formatPhone = (val) => {
+    const digits = val.replace(/\D/g, '').slice(0, 11);
+    if (!digits) return '';
+    if (digits.length <= 2) return `(${digits}`;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length === 10 && digits[2] !== '9') {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
     }
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
 
-    setFormData((prev) => ({ ...prev, phone: formatted }));
+  const handlePhoneChange = (e) => {
+    setFormData((prev) => ({ ...prev, phone: formatPhone(e.target.value) }));
+  };
+
+  // Garante que a tecla Backspace apague dígitos mesmo se o cursor estiver após separadores como '-' ou ')'
+  const handlePhoneKeyDown = (e) => {
+    if (e.key === 'Backspace') {
+      const { selectionStart, selectionEnd, value } = e.target;
+      if (selectionStart === selectionEnd && selectionStart > 0) {
+        const charBefore = value[selectionStart - 1];
+        if (charBefore === '-' || charBefore === ')' || charBefore === ' ') {
+          e.preventDefault();
+          const before = value.slice(0, selectionStart - 1).replace(/\D/g, '').slice(0, -1);
+          const after = value.slice(selectionStart).replace(/\D/g, '');
+          setFormData((prev) => ({ ...prev, phone: formatPhone(before + after) }));
+        }
+      }
+    }
   };
 
   const handleChange = (e) => {
@@ -179,6 +189,7 @@ const LeadForm = () => {
                         name="phone" 
                         value={formData.phone} 
                         onChange={handlePhoneChange} 
+                        onKeyDown={handlePhoneKeyDown}
                         placeholder="(11) 98765-4321"
                         required 
                       />
