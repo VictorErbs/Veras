@@ -17,20 +17,25 @@ const LeadForm = () => {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Máscara dinâmica: (XX) XXXXX-XXXX
+  // Máscara dinâmica: (XX) XXXXX-XXXX para celular (11 dígitos) ou (XX) XXXX-XXXX para fixo (10 dígitos)
   const handlePhoneChange = (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 11) value = value.slice(0, 11);
+    const raw = e.target.value.replace(/\D/g, '');
+    const digits = raw.slice(0, 11);
+    let formatted = digits;
 
-    if (value.length > 6) {
-      value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
-    } else if (value.length > 2) {
-      value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-    } else if (value.length > 0) {
-      value = `(${value}`;
+    if (digits.length > 10) {
+      // Celular: (XX) 9XXXX-XXXX
+      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    } else if (digits.length > 6) {
+      // Fixo parcial ou celular digitando
+      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else if (digits.length > 2) {
+      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length > 0) {
+      formatted = `(${digits}`;
     }
 
-    setFormData((prev) => ({ ...prev, phone: value }));
+    setFormData((prev) => ({ ...prev, phone: formatted }));
   };
 
   const handleChange = (e) => {
@@ -76,7 +81,8 @@ const LeadForm = () => {
       }
     } catch (err) {
       console.error("Erro na requisição:", err);
-      setStatus('success');
+      setErrorMessage('Servidor inacessível. Tente novamente em instantes.');
+      setStatus('error');
     }
   };
 
