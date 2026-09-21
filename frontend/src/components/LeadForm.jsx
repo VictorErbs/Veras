@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Phone, Mail, ShieldCheck, CheckCircle2, Sparkles, Gift } from 'lucide-react';
+import { User, Phone, Mail, ShieldCheck, CheckCircle2, Sparkles, Gift, AlertCircle } from 'lucide-react';
 import WhatsAppIcon from './WhatsAppIcon';
 import { WHATSAPP_NUMBER, API_BASE_URL } from '../config/constants';
 
@@ -11,7 +11,7 @@ const LeadForm = () => {
     name: '',
     phone: '',
     email: '',
-    lgpdConsent: false
+    lgpdConsent: true
   });
 
   const [status, setStatus] = useState('idle');
@@ -57,12 +57,29 @@ const LeadForm = () => {
     }));
   };
 
-  // Envio dos dados para a API Spring Boot
+  // Envio dos dados para a API
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    const cleanName = (formData.name || '').trim();
+    const cleanPhone = (formData.phone || '').trim();
+    const phoneDigits = cleanPhone.replace(/\D/g, '');
+
+    if (!cleanName) {
+      setErrorMessage('Por favor, informe seu nome completo.');
+      setStatus('error');
+      return;
+    }
+
+    if (phoneDigits.length < 10) {
+      setErrorMessage('Por favor, informe um WhatsApp válido com DDD (ex: 81 98765-4321).');
+      setStatus('error');
+      return;
+    }
 
     if (!formData.lgpdConsent) {
-      alert("Por favor, confirme o consentimento da LGPD para prosseguir.");
+      setErrorMessage('Por favor, marque a opção de consentimento para prosseguir.');
+      setStatus('error');
       return;
     }
 
@@ -71,9 +88,9 @@ const LeadForm = () => {
 
     try {
       const payload = {
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        email: formData.email.trim() ? formData.email.trim() : null,
+        name: cleanName,
+        phone: cleanPhone,
+        email: formData.email && formData.email.trim() ? formData.email.trim() : null,
         lgpdConsent: formData.lgpdConsent
       };
 
@@ -86,13 +103,20 @@ const LeadForm = () => {
       if (response.ok) {
         setStatus('success');
       } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText || 'Ocorreu um erro ao registrar os dados.');
+        let msg = 'Ocorreu um erro ao registrar os dados.';
+        try {
+          const errJson = await response.json();
+          msg = errJson.detail || errJson.message || msg;
+        } catch {
+          const text = await response.text();
+          if (text) msg = text;
+        }
+        setErrorMessage(msg);
         setStatus('error');
       }
     } catch (err) {
       console.error("Erro na requisição:", err);
-      setErrorMessage('Servidor inacessível. Tente novamente em instantes.');
+      setErrorMessage('Servidor indisponível no momento. Tente novamente em instantes.');
       setStatus('error');
     }
   };
@@ -162,7 +186,7 @@ const LeadForm = () => {
                 <h3>Cadastre-se Gratuitamente</h3>
                 <p className="sub">Preencha seus dados abaixo para ativar seus benefícios.</p>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                   <div className="form-group-modern">
                     <label htmlFor="name">Nome Completo *</label>
                     <div className="input-with-icon">
@@ -174,7 +198,6 @@ const LeadForm = () => {
                         value={formData.name} 
                         onChange={handleChange} 
                         placeholder="Ex: Ana Clara Martins"
-                        required 
                       />
                     </div>
                   </div>
@@ -191,7 +214,6 @@ const LeadForm = () => {
                         onChange={handlePhoneChange} 
                         onKeyDown={handlePhoneKeyDown}
                         placeholder="(11) 98765-4321"
-                        required 
                       />
                     </div>
                   </div>
@@ -218,7 +240,6 @@ const LeadForm = () => {
                       name="lgpdConsent" 
                       checked={formData.lgpdConsent} 
                       onChange={handleChange} 
-                      required 
                     />
                     <label htmlFor="lgpdConsent">
                       <strong>Concordo com os Termos LGPD:</strong> Autorizo o Studio Renata Veras 
@@ -227,19 +248,32 @@ const LeadForm = () => {
                     </label>
                   </div>
 
-                  {status === 'error' && (
-                    <p style={{ color: '#D32F2F', fontSize: '0.85rem', marginBottom: '14px' }}>
-                      {errorMessage || "Erro ao conectar com o servidor. Verifique o backend."}
-                    </p>
+                  {status === 'error' && errorMessage && (
+                    <div style={{
+                      background: '#FFEBEE',
+                      color: '#C62828',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      fontSize: '0.88rem',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      border: '1px solid #FFCDD2',
+                      lineHeight: '1.4'
+                    }}>
+                      <AlertCircle size={20} style={{ flexShrink: 0 }} />
+                      <span>{errorMessage}</span>
+                    </div>
                   )}
 
                   <button 
                     type="submit" 
                     className="btn btn-primary" 
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', cursor: status === 'loading' ? 'not-allowed' : 'pointer' }}
                     disabled={status === 'loading'}
                   >
-                    {status === 'loading' ? 'Registrando...' : 'Quero Minhas Vantagens Exclusivas'}
+                    {status === 'loading' ? 'Enviando seus dados...' : 'Quero Minhas Vantagens Exclusivas'}
                   </button>
                 </form>
               </>
