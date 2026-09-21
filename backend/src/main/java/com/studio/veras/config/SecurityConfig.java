@@ -1,5 +1,6 @@
 package com.studio.veras.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,7 +36,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/clients").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/h2-console/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
@@ -44,22 +45,38 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Usuário administrador para acesso ao painel
+    @Value("${ADMIN_USERNAME:${spring.security.user.name:}}")
+    private String adminUsername;
+
+    @Value("${ADMIN_PASSWORD:${spring.security.user.password:}}")
+    private String adminPassword;
+
+    // Usuário administrador para acesso ao painel (carregado via .env / variáveis de ambiente)
     @Bean
     public UserDetailsService userDetailsService() {
+        if (adminUsername == null || adminUsername.isBlank() || adminPassword == null || adminPassword.isBlank()) {
+            throw new IllegalStateException(
+                "Falha de segurança: ADMIN_USERNAME e ADMIN_PASSWORD devem ser configurados no arquivo .env ou variáveis de ambiente."
+            );
+        }
+        
         UserDetails admin = User.builder()
-            .username("Veras")
-            .password("{noop}veras123")
+            .username(adminUsername)
+            .password("{noop}" + adminPassword)
             .roles("ADMIN")
             .build();
         return new InMemoryUserDetailsManager(admin);
     }
 
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,https://*.vercel.app}")
+    private String allowedOrigins;
+
     // Liberação de CORS para comunicação com o frontend local e Vercel
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // Em produção, defina CORS_ALLOWED_ORIGINS para a URL exata do seu frontend na Vercel
+        configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
