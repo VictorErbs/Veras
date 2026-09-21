@@ -6,8 +6,8 @@
 // ⚠️  Definido via variável de ambiente VITE_WHATSAPP_NUMBER no arquivo .env (nunca commitar o número real)
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "5581999999999";
 
-// Ponto de entrada da API. Em produção, lê a variável definida no build da Vercel
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Ponto de entrada da API. Em produção na Vercel usa o mesmo domínio (relativo ''). Local usa VITE_API_URL.
+export const API_BASE_URL = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : '';
 
 // Dados institucionais exibidos no cabeçalho e rodapé
 export const STUDIO_INFO = {

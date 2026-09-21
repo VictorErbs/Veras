@@ -11,8 +11,8 @@
 
 ![React](https://img.shields.io/badge/React-18-pink?style=flat-square&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-6-purple?style=flat-square&logo=vite)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4-rose?style=flat-square&logo=springboot)
-![Java](https://img.shields.io/badge/Java-17-gold?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square&logo=fastapi)
+![Vercel](https://img.shields.io/badge/Vercel-Serverless-black?style=flat-square&logo=vercel)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-blue?style=flat-square&logo=postgresql)
 
 ---
@@ -43,39 +43,37 @@ Conta também com uma **área administrativa privativa** para gerenciar os conta
 Veras/
 ├── 🌸 frontend/                 # Interface em React + Vite
 │   ├── src/
-│   │   ├── assets/              # Logos, ícones e ilustrações delicadas
+│   │   ├── assets/              # Logos, ícones e ilustrações
 │   │   ├── components/          # Hero, Serviços, Depoimentos, Formulário, WhatsApp
 │   │   ├── pages/               # LandingPage, LoginPage, AdminPage
 │   │   └── config/              # Parâmetros e constantes
 │   └── index.html
 │
-├── ☕ backend/                  # API REST em Spring Boot (Java)
-│   ├── src/main/java/           # Model, Repository, Controller e Security
-│   └── src/main/resources/      # Configuração da aplicação
+├── 🐍 api/                      # Backend Serverless em Python (FastAPI)
+│   └── index.py                 # Rotas da API, Auth e Conexão Supabase
 │
+├── 📄 requirements.txt          # Dependências Python para Vercel
+├── 📄 vercel.json               # Configuração de deploy fullstack na Vercel
 └── 📄 schema.sql                # Estrutura do banco de dados (Supabase / Postgres)
 ```
 
 ---
 
-## 💻 Como Rodar o Projeto com Carinho
+## 💻 Como Rodar o Projeto
 
 ### 1. Frontend (Interface)
 
 ```bash
-cd frontend
-npm install
 npm run dev
 ```
 > Acesse: `http://localhost:5173` 🌷
 
-### 2. Backend (Serviço de Dados)
+### 2. Backend (FastAPI em Python)
 
 ```bash
-cd backend
-./mvnw spring-boot:run
+npm run api
 ```
-> API disponível em: `http://localhost:8080` ☕
+> API disponível em: `http://localhost:8000` 🐍
 
 ---
 

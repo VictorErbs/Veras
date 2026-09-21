@@ -35,3 +35,11 @@ desktop.ini
 
 # Supabase local
 supabase/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+.pytest_cache/
+
