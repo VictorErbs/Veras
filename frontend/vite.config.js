@@ -4,12 +4,14 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+// Resolve o caminho do diretório atual em módulo ES
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-// https://vite.dev/config/
+// Configuração do Vite para desenvolvimento e build do frontend
 export default defineConfig({
   plugins: [
     react(),
+    // Plugin auxiliar para espelhar a build tanto na raiz (/dist) quanto em (/frontend/dist)
     {
       name: 'copy-dist',
       closeBundle() {
@@ -23,9 +25,10 @@ export default defineConfig({
       }
     }
   ],
+  // Lê o arquivo .env localizado na raiz do projeto
   envDir: '../',
   build: {
-    outDir: '../dist',
+    outDir: '../dist', // Gera os arquivos estáticos compilados diretamente na raiz do projeto
     emptyOutDir: true,
   },
 })

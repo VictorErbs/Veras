@@ -1,11 +1,11 @@
+// Importação das dependências centrais da API
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const crypto = require('crypto');
-
 const path = require('path');
 
-// Carrega variáveis do arquivo .env
+// Carrega variáveis de ambiente do arquivo .env (local ou serverless)
 try {
   require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 } catch (e) {}
@@ -13,6 +13,7 @@ require('dotenv').config();
 
 const app = express();
 
+// Middleware de CORS para permitir requisições de qualquer origem
 app.use(cors({
   origin: '*',
   credentials: true,
@@ -20,20 +21,22 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Parser para requisições com corpo em JSON
 app.use(express.json());
 
-// Configura conexão com o Supabase PostgreSQL
+// Configuração do pool de conexão com o banco PostgreSQL no Supabase
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres.mlbrsyjdwylgyrfkodvv:NobfwDM3CCZPyK04@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false }, // Permite certificados autoassinados da nuvem
   connectionTimeoutMillis: 5000,
 });
 
-// Testa a conexão no cold start
+// Teste de conexão no cold start da função serverless
 pool.query('SELECT NOW()').catch(err => console.error("Erro na conexão com banco:", err));
 
+// Middleware de segurança Basic Auth para proteção das rotas administrativas
 function basicAuth(req, res, next) {
   const adminUser = (process.env.ADMIN_USERNAME || 'veras').trim();
   const adminPass = (process.env.ADMIN_PASSWORD || 'veras123').trim();
@@ -44,9 +47,11 @@ function basicAuth(req, res, next) {
     return res.status(401).json({ detail: "Credenciais inválidas" });
   }
 
+  // Decodifica as credenciais enviadas em Base64
   const b64auth = authHeader.split(' ')[1] || '';
   const [user, password] = Buffer.from(b64auth, 'base64').toString().split(':');
 
+  // Validação: usuário case-insensitive e senha exata
   if (user && password) {
     const inputUser = user.trim().toLowerCase();
     const expectedUser = adminUser.toLowerCase();
@@ -60,14 +65,16 @@ function basicAuth(req, res, next) {
   res.status(401).json({ detail: "Credenciais inválidas" });
 }
 
-// Rotas
+// ROTA 1: Verificação de saúde e disponibilidade da API
 app.get(['/health', '/api/health'], (req, res) => {
   res.json({ status: 'ok', service: 'veras-node-api' });
 });
 
+// ROTA 2: Cadastro público de novos clientes (Leads VIP)
 app.post(['/clients', '/api/clients'], async (req, res) => {
   const { name, phone, email, lgpdConsent } = req.body || {};
 
+  // Validações obrigatórias de campos e LGPD
   if (!lgpdConsent) {
     return res.status(400).json({ detail: "O consentimento da LGPD é obrigatório" });
   }
@@ -87,6 +94,7 @@ app.post(['/clients', '/api/clients'], async (req, res) => {
     const cleanEmail = (email || '').trim() || null;
     const values = [name.trim(), phone.trim(), cleanEmail, lgpdConsent];
     
+    // Executa a inserção no Supabase
     const result = await pool.query(query, values);
     const client = result.rows[0];
     
@@ -97,6 +105,7 @@ app.post(['/clients', '/api/clients'], async (req, res) => {
   }
 });
 
+// ROTA 3: Listagem protegida de clientes cadastrados (Apenas administradores autenticados)
 app.get(['/clients', '/api/clients'], basicAuth, async (req, res) => {
   try {
     const query = `
@@ -112,8 +121,10 @@ app.get(['/clients', '/api/clients'], basicAuth, async (req, res) => {
   }
 });
 
+// Exporta o app para o ambiente Serverless da Vercel
 module.exports = app;
 
+// Executa servidor HTTP convencional caso executado localmente via "npm run api"
 if (require.main === module) {
   const port = process.env.PORT || 8000;
   app.listen(port, () => {
