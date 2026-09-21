@@ -25,7 +25,10 @@ app.use(cors({
 app.use(express.json());
 
 // Configuração do pool de conexão com o banco PostgreSQL no Supabase
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres.mlbrsyjdwylgyrfkodvv:NobfwDM3CCZPyK04@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
+const DATABASE_URL = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+if (!DATABASE_URL) {
+  console.error("ERRO CRÍTICO: DATABASE_URL não configurada no ambiente.");
+}
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
@@ -38,8 +41,12 @@ pool.query('SELECT NOW()').catch(err => console.error("Erro na conexão com banc
 
 // Middleware de segurança Basic Auth para proteção das rotas administrativas
 function basicAuth(req, res, next) {
-  const adminUser = (process.env.ADMIN_USERNAME || 'veras').trim();
-  const adminPass = (process.env.ADMIN_PASSWORD || 'veras123').trim();
+  const adminUser = (process.env.ADMIN_USERNAME || '').trim();
+  const adminPass = (process.env.ADMIN_PASSWORD || '').trim();
+
+  if (!adminUser || !adminPass) {
+    return res.status(500).json({ detail: "Credenciais de administrador não configuradas no ambiente." });
+  }
 
   const authHeader = req.headers.authorization || '';
   if (!authHeader.startsWith('Basic ')) {
