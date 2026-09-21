@@ -39,7 +39,12 @@ const LoginPage = () => {
       } else if (response.status === 401) {
         setError('Credenciais incorretas. Verifique usuário e senha.');
       } else {
-        setError('Erro ao conectar com o servidor. Tente novamente.');
+        let errorMsg = 'Erro ao conectar com o servidor. Tente novamente.';
+        try {
+          const errData = await response.json();
+          if (errData.detail) errorMsg = errData.detail;
+        } catch {}
+        setError(errorMsg);
       }
     } catch {
       setError('Servidor offline ou inacessível no momento.');

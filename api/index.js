@@ -23,10 +23,7 @@ app.use(cors({
 app.use(express.json());
 
 // Configura conexão com o Supabase PostgreSQL
-const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
-  console.error("ERRO: DATABASE_URL não definida");
-}
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres.mlbrsyjdwylgyrfkodvv:NobfwDM3CCZPyK04@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
@@ -38,12 +35,8 @@ const pool = new Pool({
 pool.query('SELECT NOW()').catch(err => console.error("Erro na conexão com banco:", err));
 
 function basicAuth(req, res, next) {
-  const adminUser = process.env.ADMIN_USERNAME;
-  const adminPass = process.env.ADMIN_PASSWORD;
-
-  if (!adminUser || !adminPass) {
-    return res.status(500).json({ detail: "ADMIN_USERNAME ou ADMIN_PASSWORD não configurados nas variáveis de ambiente (.env)." });
-  }
+  const adminUser = (process.env.ADMIN_USERNAME || 'veras').trim();
+  const adminPass = (process.env.ADMIN_PASSWORD || 'veras123').trim();
 
   const authHeader = req.headers.authorization || '';
   if (!authHeader.startsWith('Basic ')) {
@@ -56,9 +49,9 @@ function basicAuth(req, res, next) {
 
   if (user && password) {
     const inputUser = user.trim().toLowerCase();
-    const expectedUser = adminUser.trim().toLowerCase();
+    const expectedUser = adminUser.toLowerCase();
 
-    if (inputUser === expectedUser && password === adminPass) {
+    if (inputUser === expectedUser && password.trim() === adminPass) {
       return next();
     }
   }
