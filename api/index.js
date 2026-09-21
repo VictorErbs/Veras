@@ -37,10 +37,14 @@ const pool = new Pool({
 // Testa a conexão no cold start
 pool.query('SELECT NOW()').catch(err => console.error("Erro na conexão com banco:", err));
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'veras';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'veras123';
-
 function basicAuth(req, res, next) {
+  const adminUser = process.env.ADMIN_USERNAME;
+  const adminPass = process.env.ADMIN_PASSWORD;
+
+  if (!adminUser || !adminPass) {
+    return res.status(500).json({ detail: "ADMIN_USERNAME ou ADMIN_PASSWORD não configurados nas variáveis de ambiente (.env)." });
+  }
+
   const authHeader = req.headers.authorization || '';
   if (!authHeader.startsWith('Basic ')) {
     res.set('WWW-Authenticate', 'Basic realm="401"');
@@ -50,14 +54,11 @@ function basicAuth(req, res, next) {
   const b64auth = authHeader.split(' ')[1] || '';
   const [user, password] = Buffer.from(b64auth, 'base64').toString().split(':');
 
-  const expectedUser = (ADMIN_USERNAME || 'veras').trim().toLowerCase();
-  const expectedPass = (ADMIN_PASSWORD || 'veras123').trim();
-
   if (user && password) {
     const inputUser = user.trim().toLowerCase();
-    const inputPass = password.trim();
+    const expectedUser = adminUser.trim().toLowerCase();
 
-    if (inputUser === expectedUser && inputPass === expectedPass) {
+    if (inputUser === expectedUser && password === adminPass) {
       return next();
     }
   }
