@@ -20,7 +20,7 @@ const LoginPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'Veras' && password === 'veras123') {
       const basicToken = btoa(`${username}:${password}`);
       localStorage.setItem('adminToken', basicToken);
       navigate('/admin');
@@ -62,7 +62,7 @@ const LoginPage = () => {
                 type="text" 
                 value={username} 
                 onChange={(e) => setUsername(e.target.value)} 
-                placeholder="Ex: admin"
+                placeholder="Usuário"
                 required 
               />
             </div>
@@ -94,9 +94,8 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Lembrete das credenciais padrão para ambiente de homologação */}
         <div style={{ marginTop: '24px', padding: '12px', background: 'var(--bg-body)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-          💡 <strong>Acesso Padrão:</strong> Usuário <code>admin</code> e senha <code>admin123</code>
+          🔒 Acesso restrito à equipe Studio Renata Veras
         </div>
       </div>
     </div>
