@@ -13,7 +13,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:80
 export const STUDIO_INFO = {
   name: "Studio Renata Veras",
   tagline: "Estética e Micropigmentação",
-  instagram: "@studiorenataveras",
-  instagramUrl: "https://instagram.com",
-  schedule: "Seg a Sex: 09h às 19h | Sáb: 09h às 14h"
+  instagram: "@renataveras_estetica",
+  instagramUrl: "https://www.instagram.com/renataveras_estetica?stkn=ZDNlZDc0MzIxNw==",
+  schedule: "Seg a Sex: 14h às 18h"
 };
