@@ -1,0 +1,34 @@
+# Dependências Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Compilação Java / Maven / Backend
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# IDEs e Editores
+.idea/
+*.iml
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
