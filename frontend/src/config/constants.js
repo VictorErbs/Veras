@@ -3,7 +3,8 @@
  */
 
 // Número de telefone para onde os clientes serão redirecionados nas conversões do WhatsApp
-export const WHATSAPP_NUMBER = "5581999999999";
+// ⚠️  Definido via variável de ambiente VITE_WHATSAPP_NUMBER no arquivo .env (nunca commitar o número real)
+export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "5581999999999";
 
 // Ponto de entrada da API. Em produção, lê a variável definida no build da Vercel
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
