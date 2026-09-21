@@ -2,6 +2,9 @@
   "name": "studio-renata-veras",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "description": "Studio Renata Veras - Landing Page e Sistema de Captação",
   "scripts": {
     "dev": "npm run dev --prefix frontend",
