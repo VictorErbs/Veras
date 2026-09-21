@@ -54,10 +54,17 @@ const LeadForm = () => {
     setErrorMessage('');
 
     try {
+      const payload = {
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() ? formData.email.trim() : null,
+        lgpdConsent: formData.lgpdConsent
+      };
+
       const response = await fetch(`${API_BASE_URL}/api/clients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {

@@ -38,4 +38,9 @@ public class Client {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    // Converte string vazia enviada pelo frontend opcional para null, evitando falha no @Email
+    public void setEmail(String email) {
+        this.email = (email != null && email.trim().isEmpty()) ? null : email;
+    }
 }

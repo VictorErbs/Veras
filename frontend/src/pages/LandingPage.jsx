@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '../components/Header';
-import Hero from '../components/Hero';
+import Capa from '../components/Capa';
 import ServicesList from '../components/ServicesList';
 import Features from '../components/Features';
 import Testimonials from '../components/Testimonials';
@@ -16,7 +16,7 @@ const LandingPage = () => {
     <div className="landing-page-root">
       <Header />
       <main>
-        <Hero />
+        <Capa />
         <ServicesList />
         <Features />
         <Testimonials />

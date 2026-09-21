@@ -99,8 +99,6 @@ const SERVICES = [
 
 /**
  * Grid de serviços interativos.
- * Ao interagir com qualquer card, direciona o lead para o chat do WhatsApp
- * com o texto de interesse correspondente já preenchido.
  */
 const ServicesList = () => {
 
@@ -113,8 +111,6 @@ const ServicesList = () => {
     const message = `Olá! Gostaria de saber mais sobre o serviço ${serviceTitle}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-    
-    // Abre a conversa em uma nova janela para não interromper a navegação no site
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 

@@ -5,7 +5,6 @@ import { ShieldCheck, HeartHandshake, Sparkles, Clock } from 'lucide-react';
  * Seção que lista os pilares de qualidade, segurança e biossegurança da clínica.
  */
 const Features = () => {
-  // Lista de atributos essenciais que reforçam a credibilidade do atendimento
   const features = [
     {
       icon: ShieldCheck,
