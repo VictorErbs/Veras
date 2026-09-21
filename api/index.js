@@ -37,14 +37,10 @@ const pool = new Pool({
 // Testa a conexão no cold start
 pool.query('SELECT NOW()').catch(err => console.error("Erro na conexão com banco:", err));
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Veras';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'veras';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'veras123';
 
 function basicAuth(req, res, next) {
-  if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
-    return res.status(500).json({ detail: "Falha de segurança: ADMIN_USERNAME e ADMIN_PASSWORD não configurados no servidor." });
-  }
-
   const authHeader = req.headers.authorization || '';
   if (!authHeader.startsWith('Basic ')) {
     res.set('WWW-Authenticate', 'Basic realm="401"');
@@ -54,15 +50,15 @@ function basicAuth(req, res, next) {
   const b64auth = authHeader.split(' ')[1] || '';
   const [user, password] = Buffer.from(b64auth, 'base64').toString().split(':');
 
+  const expectedUser = (ADMIN_USERNAME || 'veras').trim().toLowerCase();
+  const expectedPass = (ADMIN_PASSWORD || 'veras123').trim();
+
   if (user && password) {
-    try {
-      const userMatch = crypto.timingSafeEqual(Buffer.from(user), Buffer.from(ADMIN_USERNAME));
-      const passMatch = crypto.timingSafeEqual(Buffer.from(password), Buffer.from(ADMIN_PASSWORD));
-      if (userMatch && passMatch) {
-        return next();
-      }
-    } catch (err) {
-      // Falha ao comparar buffers de tamanhos diferentes, ou seja, usuário/senha incorretos
+    const inputUser = user.trim().toLowerCase();
+    const inputPass = password.trim();
+
+    if (inputUser === expectedUser && inputPass === expectedPass) {
+      return next();
     }
   }
 
