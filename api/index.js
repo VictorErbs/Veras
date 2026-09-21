@@ -3,10 +3,13 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const crypto = require('crypto');
 
-// Load environment variables if not in production
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
+const path = require('path');
+
+// Carrega variáveis do arquivo .env
+try {
+  require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+} catch (e) {}
+require('dotenv').config();
 
 const app = express();
 
@@ -27,14 +30,15 @@ if (!DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
   connectionTimeoutMillis: 5000,
 });
 
 // Testa a conexão no cold start
 pool.query('SELECT NOW()').catch(err => console.error("Erro na conexão com banco:", err));
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Veras';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'veras123';
 
 function basicAuth(req, res, next) {
   if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {

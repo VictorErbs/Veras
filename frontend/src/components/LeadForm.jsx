@@ -17,18 +17,19 @@ const LeadForm = () => {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Máscara dinâmica: (XX) XXXXX-XXXX para celular (11 dígitos) ou (XX) XXXX-XXXX para fixo (10 dígitos)
+  // Máscara brasileira para celular/WhatsApp: (XX) 9XXXX-XXXX
   const handlePhoneChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, '');
-    const digits = raw.slice(0, 11);
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
     let formatted = digits;
 
-    if (digits.length > 10) {
-      // Celular: (XX) 9XXXX-XXXX
-      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-    } else if (digits.length > 6) {
-      // Fixo parcial ou celular digitando
-      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    if (digits.length > 7) {
+      if (digits.length === 10 && digits[2] !== '9') {
+        // Fixo (10 dígitos sem 9 inicial)
+        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      } else {
+        // Celular (9 dígitos): (XX) 9XXXX-XXXX
+        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      }
     } else if (digits.length > 2) {
       formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     } else if (digits.length > 0) {
