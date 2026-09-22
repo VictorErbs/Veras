@@ -205,5 +205,5 @@ Veras/
 ---
 
 <div align="center">
-  <sub>© {ano atual} Studio Renata Veras. Todos os direitos reservados.</sub>
+  <sub>© 2026 Studio Renata Veras. Todos os direitos reservados.</sub>
 </div>
