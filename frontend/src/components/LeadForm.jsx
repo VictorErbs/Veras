@@ -233,45 +233,52 @@ const LeadForm = () => {
                     </div>
                   </div>
 
-                  <div className="lgpd-box" style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '14px',
-                    borderRadius: '8px',
-                    background: '#FAFAFA',
-                    border: '1px solid rgba(192, 13, 90, 0.15)',
-                    marginBottom: '20px'
-                  }}>
-                    <input 
-                      type="checkbox" 
-                      id="lgpdConsent" 
-                      name="lgpdConsent" 
-                      checked={formData.lgpdConsent} 
-                      onChange={handleChange} 
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        minWidth: '20px',
-                        minHeight: '20px',
-                        marginTop: '2px',
-                        accentColor: '#D70372',
-                        cursor: 'pointer',
-                        display: 'inline-block',
-                        visibility: 'visible',
-                        opacity: 1
-                      }}
-                    />
-                    <label htmlFor="lgpdConsent" style={{
+                  <div
+                    onClick={() => setFormData(prev => ({ ...prev, lgpdConsent: !prev.lgpdConsent }))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      padding: '14px',
+                      borderRadius: '8px',
+                      background: '#FAFAFA',
+                      border: '1px solid rgba(192, 13, 90, 0.15)',
+                      marginBottom: '20px',
+                      cursor: 'pointer',
+                      userSelect: 'none'
+                    }}
+                  >
+                    {/* Custom checkbox — div garante visibilidade independente de reset CSS */}
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      minWidth: '20px',
+                      minHeight: '20px',
+                      marginTop: '2px',
+                      borderRadius: '4px',
+                      border: formData.lgpdConsent ? 'none' : '2px solid #C00D5A',
+                      background: formData.lgpdConsent ? '#D70372' : '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      transition: 'background 0.15s, border 0.15s'
+                    }}>
+                      {formData.lgpdConsent && (
+                        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                          <path d="M1 5L4.5 8.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{
                       fontSize: '0.82rem',
                       color: '#6E5A64',
-                      lineHeight: '1.5',
-                      cursor: 'pointer'
+                      lineHeight: '1.5'
                     }}>
                       <strong style={{ color: '#17090F' }}>Concordo com os Termos LGPD:</strong> Autorizo o Studio Renata Veras 
                       a armazenar meus dados (Nome, Telefone e E-mail) exclusivamente para contato, 
                       agendamentos e envio de promoções personalizadas, podendo revogar a qualquer momento.
-                    </label>
+                    </span>
                   </div>
 
                   {status === 'error' && errorMessage && (
