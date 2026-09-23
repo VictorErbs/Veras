@@ -106,7 +106,71 @@ Visitante → Frontend (React/Vite na Vercel)
 | `POST` | `/api/clients` | — | Cadastra lead. **400** sem LGPD, **422** sem nome/telefone, **201** OK |
 | `GET` | `/api/clients` | Basic | Lista leads ordenados. **401** se credenciais inválidas |
 
-**Modelo de dados (`clients`):** `id` (UUID), `name`, `phone`, `email` (opcional), `lgpd_consent` (boolean), `created_at` (UTC). Script em [`schema.sql`](./schema.sql).
+---
+
+## 🧠 Arquitetura do Banco de Dados Relacional
+
+O sistema utiliza **PostgreSQL** gerenciado via **Supabase**, integrado a funções serverless na **Vercel** através de pool de conexões com TLS/SSL.
+
+### 🗺️ Mapa Mental da Estrutura
+
+```mermaid
+mindmap
+  root((PostgreSQL Supabase))
+    Tabela clients
+      id [UUID PK]
+        gen_random_uuid
+        Chave primaria indexada
+      name [VARCHAR 255]
+        NOT NULL
+        Nome completo do lead
+      phone [VARCHAR 20]
+        NOT NULL
+        WhatsApp com DDD
+      email [VARCHAR 255]
+        NULLABLE
+        Contato opcional
+      lgpd_consent [BOOLEAN]
+        NOT NULL default false
+        Aceite explicito LGPD
+      created_at [TIMESTAMPTZ]
+        NOT NULL default UTC now
+        Auditoria e ordenacao
+    Seguranca e RLS
+      Row Level Security
+        Habilitado na tabela clients
+        Politica restrita para backend
+      Controle de Acesso
+        POST api clients validado
+        GET api clients com Basic Auth
+    Conexoes e Driver
+      pg Pool Node js
+        SSL ativo rejectUnauthorized false
+        Timeout de conexao 5000ms
+      Ambiente Nuvem
+        Supabase Cloud PostgreSQL
+        Vercel Serverless Functions
+    Fluxo de Dados
+      1 Captura no Formulario
+        LeadForm envia payload sanitizado
+      2 Validacao na API
+        Bloqueio sem aceite LGPD ou campos
+      3 Gravacao Relacional
+        INSERT RETURNING id e timestamps
+      4 Painel Administrativo
+        AdminPage consome ordenado por data
+```
+
+### 📋 Dicionário de Dados (`clients`)
+
+| Coluna | Tipo | Nulo | Padrão | Descrição |
+| :--- | :--- | :---: | :--- | :--- |
+| `id` | `UUID` | ❌ Não | `gen_random_uuid()` | Identificador único primário (PK) |
+| `name` | `VARCHAR(255)` | ❌ Não | *Nenhum* | Nome completo informado pelo lead |
+| `phone` | `VARCHAR(20)` | ❌ Não | *Nenhum* | Telefone/WhatsApp com DDD |
+| `email` | `VARCHAR(255)` | ✔️ Sim | `NULL` | E-mail opcional para contato |
+| `lgpd_consent`| `BOOLEAN` | ❌ Não | `false` | Registro de consentimento legal LGPD |
+| `created_at` | `TIMESTAMPTZ` | ❌ Não | `timezone('utc', now())` | Data/hora UTC do pré-agendamento |
 
 ---
 
