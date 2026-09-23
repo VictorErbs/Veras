@@ -11,7 +11,7 @@ const LeadForm = () => {
     name: '',
     phone: '',
     email: '',
-    lgpdConsent: true
+    lgpdConsent: false
   });
 
   const [status, setStatus] = useState('idle');
