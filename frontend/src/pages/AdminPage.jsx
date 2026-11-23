@@ -37,7 +37,7 @@ const AdminPage = () => {
    * Se receber 401 (não autorizado), expira a sessão e redireciona para o login.
    */
   const fetchClients = async () => {
-    const token = localStorage.getItem('adminToken');
+    const token = sessionStorage.getItem('adminToken');
     if (!token) {
       navigate('/login');
       return;
@@ -51,7 +51,7 @@ const AdminPage = () => {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminToken');
         navigate('/login');
         return;
       }
@@ -72,7 +72,7 @@ const AdminPage = () => {
 
   // Encerra a sessão removendo o token e redirecionando para a tela de autenticação
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+    sessionStorage.removeItem('adminToken');
     navigate('/login');
   };
 
@@ -89,6 +89,15 @@ const AdminPage = () => {
   });
 
   /**
+   * Escapa células CSV contra aspas internas e CSV/Formula Injection (=, +, -, @, tab, CR).
+   */
+  const escapeCsvCell = (value) => {
+    const str = String(value ?? '');
+    const safe = /^[=+\-@\t\r]/.test(str) ? `'${str}` : str;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+
+  /**
    * Monta e dispara o download de um arquivo CSV formatado com os dados filtrados.
    * Compatível com Excel e Google Sheets.
    */
@@ -100,24 +109,24 @@ const AdminPage = () => {
 
     const headers = ["ID", "Nome", "Telefone", "Email", "Consentimento LGPD", "Data de Cadastro"];
     const rows = filteredClients.map((c) => [
-      c.id,
-      `"${c.name}"`,
-      `"${c.phone}"`,
-      `"${c.email || ''}"`,
-      c.lgpdConsent ? "Sim" : "Não",
-      new Date(c.createdAt).toLocaleString('pt-BR')
+      escapeCsvCell(c.id),
+      escapeCsvCell(c.name),
+      escapeCsvCell(c.phone),
+      escapeCsvCell(c.email || ''),
+      escapeCsvCell(c.lgpdConsent ? "Sim" : "Não"),
+      escapeCsvCell(new Date(c.createdAt).toLocaleString('pt-BR'))
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
+    const csvBody = [headers.map(escapeCsvCell).join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob(["﻿" + csvBody], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", `clientes_studio_renata_veras_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   /**
@@ -169,7 +178,11 @@ const AdminPage = () => {
               <span style={{ fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Conformidade LGPD</span>
               <ShieldCheck size={22} />
             </div>
-            <h3 style={{ fontSize: '2rem', color: 'var(--text-title)' }}>100%</h3>
+            <h3 style={{ fontSize: '2rem', color: 'var(--text-title)' }}>
+              {clients.length === 0
+                ? '—'
+                : `${Math.round((clients.filter(c => c.lgpdConsent).length / clients.length) * 100)}%`}
+            </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Termos aceitos formalmente</p>
           </div>
 

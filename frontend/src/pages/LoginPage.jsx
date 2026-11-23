@@ -34,7 +34,7 @@ const LoginPage = () => {
       });
 
       if (response.ok || response.status === 200) {
-        localStorage.setItem('adminToken', basicToken);
+        sessionStorage.setItem('adminToken', basicToken);
         navigate('/admin');
       } else if (response.status === 401) {
         setError('Credenciais incorretas. Verifique usuário e senha.');

@@ -9,11 +9,9 @@ CREATE TABLE IF NOT EXISTS clients (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Habilitar RLS (Row Level Security) mas permitindo tudo por enquanto, 
--- já que o backend que fará a comunicação
+-- Habilitar RLS (Row Level Security) sem policies públicas:
+-- bloqueia acesso direto via API REST do Supabase (anon/authenticated),
+-- enquanto o backend Node (via DATABASE_URL / postgres) continua operando normalmente.
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable all actions for authenticated users only" ON clients
-    FOR ALL
-    USING (true)
-    WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable all actions for authenticated users only" ON clients;

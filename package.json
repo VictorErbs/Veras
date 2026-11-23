@@ -10,6 +10,7 @@
     "dev": "npm run dev --prefix frontend",
     "api": "node api/index.js",
     "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
     "preview": "npm run preview --prefix frontend"
   },
   "dependencies": {
